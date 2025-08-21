@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CheckSquare, Loader2 } from "lucide-react";
+import { CheckSquare, Loader2, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,27 +27,27 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
-import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
-  username: z.string().min(1, { message: "Username is required." }),
-  password: z.string().min(1, { message: "Password is required." }),
+  username: z.string().min(3, { message: "Username must be at least 3 characters." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
 });
 
-export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user, login, isLoading } = useAuth();
-  const { toast } = useToast();
 
-  const registered = searchParams.get('registered');
+export default function RegisterPage() {
+  const router = useRouter();
+  const { user, login, isLoading } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -56,19 +56,12 @@ export default function LoginPage() {
       router.push("/tasks");
     }
   }, [user, router]);
-  
-  useEffect(() => {
-    if (registered) {
-      toast({
-        title: "Registration Successful",
-        description: "You can now log in with your new account.",
-      });
-    }
-  }, [registered, toast]);
-
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    // In a real app, you'd call an API to register the user.
+    // Here, we'll just log them in directly.
     login(values.username);
+    router.push('/?registered=true');
   };
 
   if (isLoading || user) {
@@ -85,11 +78,11 @@ export default function LoginPage() {
         <Card className="shadow-2xl">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <CheckSquare className="h-8 w-8" />
+              <UserPlus className="h-8 w-8" />
             </div>
-            <CardTitle className="font-headline text-3xl">TaskMaster</CardTitle>
+            <CardTitle className="font-headline text-3xl">Create Account</CardTitle>
             <CardDescription>
-              Sign in to manage your tasks.
+              Get started with TaskMaster today.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -121,31 +114,41 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
+                 <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing In...
+                      Creating Account...
                     </>
                   ) : (
-                    "Sign In"
+                    "Create Account"
                   )}
                 </Button>
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex justify-center">
+           <CardFooter className="flex justify-center">
              <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <Link href="/register" className="font-semibold text-primary hover:underline">
-                  Register
+                Already have an account?{" "}
+                <Link href="/" className="font-semibold text-primary hover:underline">
+                  Sign In
                 </Link>
               </p>
           </CardFooter>
         </Card>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Note: This is a demo. Any username and password will work.
-        </p>
       </div>
     </main>
   );
