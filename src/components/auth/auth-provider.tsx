@@ -1,17 +1,17 @@
+
 "use client";
 
 import React, { createContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged, User, signOut as firebaseSignOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
-interface User {
-  username: string;
-}
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (username: string) => void;
-  logout: () => void;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,34 +22,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("taskmaster_user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (error) {
-      console.error("Failed to parse user from localStorage", error);
-      localStorage.removeItem("taskmaster_user");
-    } finally {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
       setIsLoading(false);
+       if (user) {
+        router.push("/tasks");
+      } else {
+        router.push("/");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  const login = useCallback(async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Error during sign-in:", error);
     }
   }, []);
 
-  const login = useCallback(
-    (username: string) => {
-      const newUser = { username };
-      localStorage.setItem("taskmaster_user", JSON.stringify(newUser));
-      setUser(newUser);
-      router.push("/tasks");
-    },
-    [router]
-  );
-
-  const logout = useCallback(() => {
-    localStorage.removeItem("taskmaster_user");
-    setUser(null);
-    router.push("/");
-  }, [router]);
+  const logout = useCallback(async () => {
+    try {
+      await firebaseSignOut(auth);
+    } catch (error) {
+      console.error("Error during sign-out:", error);
+    }
+  }, []);
 
   const value = { user, isLoading, login, logout };
 
