@@ -5,24 +5,12 @@ import { Task } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { BrainCircuit, Trash2, Loader2, Edit, Save, X } from "lucide-react";
-import { getTaskEstimation } from "@/app/tasks/actions";
-import { useToast } from "@/hooks/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Trash2, Edit, Save, X } from "lucide-react";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,10 +32,7 @@ const formSchema = z.object({
 });
 
 export default function TaskItem({ task, onToggleTask, onDeleteTask, onUpdateTask }: TaskItemProps) {
-  const [isEstimating, setIsEstimating] = useState(false);
-  const [estimationResult, setEstimationResult] = useState<{ estimatedTime: string; reminderInstructions: string } | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,21 +41,6 @@ export default function TaskItem({ task, onToggleTask, onDeleteTask, onUpdateTas
       description: task.description,
     },
   });
-
-  const handleEstimate = async () => {
-    setIsEstimating(true);
-    const result = await getTaskEstimation(task.description || task.title);
-    setIsEstimating(false);
-    if (result.success && result.data) {
-      setEstimationResult(result.data);
-    } else {
-      toast({
-        variant: "destructive",
-        title: "AI Estimation Failed",
-        description: "Could not get an estimation for this task. Please try again.",
-      });
-    }
-  };
   
   const handleUpdate = (values: z.infer<typeof formSchema>) => {
     onUpdateTask(task.id, values.title, values.description || "");
@@ -142,14 +112,6 @@ export default function TaskItem({ task, onToggleTask, onDeleteTask, onUpdateTas
           </>
         ) : (
           <>
-            <Button variant="outline" size="sm" onClick={handleEstimate} disabled={isEstimating || task.completed}>
-              {isEstimating ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <BrainCircuit className="mr-2 h-4 w-4" />
-              )}
-              AI Estimate
-            </Button>
             <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} disabled={task.completed}>
               <Edit className="h-4 w-4" />
             </Button>
@@ -159,35 +121,6 @@ export default function TaskItem({ task, onToggleTask, onDeleteTask, onUpdateTas
           </>
         )}
       </CardFooter>
-
-      {estimationResult && (
-        <AlertDialog open={!!estimationResult} onOpenChange={() => setEstimationResult(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="font-headline flex items-center">
-                <BrainCircuit className="mr-2 h-5 w-5 text-primary" />
-                AI Task Estimation
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                Here is the AI's estimation for completing: <span className="font-semibold text-foreground">{task.title}</span>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="py-4 space-y-4">
-              <div>
-                <h4 className="font-semibold">Estimated Time:</h4>
-                <p className="text-accent font-bold text-lg">{estimationResult.estimatedTime}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold">Reminder Suggestion:</h4>
-                <p>{estimationResult.reminderInstructions}</p>
-              </div>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setEstimationResult(null)}>Got it!</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
     </Card>
   );
 }
