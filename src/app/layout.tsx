@@ -22,6 +22,7 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        <link rel="shortcut icon" href="https://res.cloudinary.com/dry3pzan6/image/upload/v1755767689/vglgt8oxumszm8jnfnuy.png" type="image/x-icon" />
         <link
           href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
           rel="stylesheet"
