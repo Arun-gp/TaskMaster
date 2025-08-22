@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { CheckSquare, LogOut } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Header() {
   const { logout } = useAuth();
@@ -15,6 +16,7 @@ export function Header() {
           <span className="font-bold font-headline text-lg">TaskMaster</span>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
+           <ThemeToggle />
           <Button variant="ghost" size="sm" onClick={logout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
