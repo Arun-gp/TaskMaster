@@ -15,24 +15,28 @@ const initialTasks: Task[] = [
     title: "Set up project structure",
     description: "Initialize Next.js app, install dependencies, and set up folder structure.",
     completed: true,
+    createdAt: new Date(new Date().setDate(new Date().getDate() - 3)),
   },
   {
     id: uuidv4(),
     title: "Design UI components",
     description: "Create reusable components for buttons, inputs, and cards using shadcn/ui.",
     completed: true,
+    createdAt: new Date(new Date().setDate(new Date().getDate() - 2)),
   },
   {
     id: uuidv4(),
     title: "Implement Task CRUD",
     description: "Develop functionality to create, read, update, and delete tasks.",
     completed: false,
+    createdAt: new Date(new Date().setDate(new Date().getDate() - 1)),
   },
     {
     id: uuidv4(),
     title: "Integrate AI for prioritization",
     description: "Use GenAI to estimate task completion time and suggest reminders.",
     completed: false,
+    createdAt: new Date(),
   },
 ];
 
@@ -47,6 +51,7 @@ export default function TasksPage() {
       title,
       description,
       completed: false,
+      createdAt: new Date(),
     };
     setTasks((prevTasks) => [newTask, ...prevTasks]);
   };

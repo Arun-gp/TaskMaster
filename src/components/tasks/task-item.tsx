@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { format } from "date-fns";
 import { Task } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, Edit, Save, X } from "lucide-react";
+import { Trash2, Edit, Save, X, CalendarIcon } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -68,6 +69,10 @@ export default function TaskItem({ task, onToggleTask, onDeleteTask, onUpdateTas
                     {task.description}
                   </CardDescription>
                 )}
+                 <div className="mt-2 flex items-center text-xs text-muted-foreground">
+                    <CalendarIcon className="mr-1.5 h-4 w-4" />
+                    <span>Created on {format(task.createdAt, "PPP")}</span>
+                  </div>
               </>
             ) : (
               <Form {...form}>
